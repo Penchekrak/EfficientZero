@@ -34,7 +34,7 @@ namespace tree{
         this->w_value = 0.0;
     }
 
-    CNode::CNode(float prior, int action_num, std::vector<CNode>* ptr_node_pool){
+    CNode::CNode(float prior, int action_num, std::vector<CNode>* ptr_node_pool, ){
         this->prior = prior;
         this->action_num = action_num;
 
@@ -356,14 +356,20 @@ namespace tree{
         }
     }
 
-    int cselect_child(CNode* root, tools::CMinMaxStats &min_max_stats, float pb_c_1, float pb_c_2, float pb_c_3, float discount, float mean_q, float mean_w){
+    int cselect_child(CNode* root, tools::CMinMaxStats &min_max_stats, float pb_c_1, float pb_c_2, float pb_c_3, float discount, float mean_q, float mean_w, float max_q, int mode){
         float max_score = FLOAT_MIN;
         const float epsilon = 0.000001;
         std::vector<int> max_index_lst;
         for(int a = 0; a < root->action_num; ++a){
             CNode* child = root->get_child(a);
-            float temp_score = cucb_score(child, min_max_stats, mean_q, mean_w, root->is_reset, root->visit_count - 1, root->value_prefix, pb_c_1, pb_c_2, pb_c_3, discount);
-
+            float temp_score = 0.;
+            if (mode==0){
+                temp_score = cucb_score(child, min_max_stats, mean_q, mean_w, root->is_reset, root->visit_count - 1, root->value_prefix, pb_c_1, pb_c_2, pb_c_3, discount);
+            } else if (mode==1){
+                temp_score = cucb_score_prior(child, min_max_stats, mean_q, mean_w, root->is_reset, root->visit_count - 1, root->value_prefix, pb_c_1, pb_c_2, pb_c_3, discount);
+            } else if (mode==2){
+                temp_score = cucb_score_bern(child, min_max_stats, mean_q, mean_w, root->is_reset, root->visit_count - 1, root->value_prefix, pb_c_1, pb_c_2, pb_c_3, discount, max_q);
+            }
             if(max_score < temp_score){
                 max_score = temp_score;
 
@@ -383,7 +389,7 @@ namespace tree{
         return action;
     }
 
-    float cucb_score(CNode *child, tools::CMinMaxStats &min_max_stats, float parent_mean_q, float parent_mean_w, int is_reset, float total_children_visit_counts, float parent_value_prefix, float pb_c_1, float pb_c_2, float pb_c_3, float discount){
+    float cucb_score_base(CNode *child, tools::CMinMaxStats &min_max_stats, float parent_mean_q, float parent_mean_w, int is_reset, float total_children_visit_counts, float parent_value_prefix, float pb_c_1, float pb_c_2, float pb_c_3, float discount){
         float pb_1 = 0.0, pb_2 = 0.0, value_score = 0.0, sigma2 = 0.0, w_score = 0.0, L = 0.0;
 //         pb_c = log((total_children_visit_counts + pb_c_base + 1) / pb_c_base) + pb_c_init;
 //         pb_c *= (sqrt(total_children_visit_counts) / (child->visit_count + 1));
@@ -414,8 +420,72 @@ namespace tree{
         float ucb_value = value_score + sigma2 * pb_1 + pb_2;
         return ucb_value;
     }
+    
+    float cucb_score_prior(CNode *child, tools::CMinMaxStats &min_max_stats, float parent_mean_q, float parent_mean_w, int is_reset, float total_children_visit_counts, float parent_value_prefix, float pb_c_1, float pb_c_2, float pb_c_3, float discount){
+        float pb_1 = 0.0, pb_2 = 0.0, value_score = 0.0, sigma2 = 0.0, w_score = 0.0, L = 0.0;
+//         pb_c = log((total_children_visit_counts + pb_c_base + 1) / pb_c_base) + pb_c_init;
+//         pb_c *= (sqrt(total_children_visit_counts) / (child->visit_count + 1));
+        L = log(total_children_visit_counts + pb_c_3 + 1);
+        pb_1 = pb_c_1 * sqrt(L) / sqrt(1 + child->visit_count);
+        pb_2 = pb_c_2 * L / (1 + child->visit_count);
 
-    void cbatch_traverse(CRoots *roots, float pb_c_1, float pb_c_2, float pb_c_3, float discount, tools::CMinMaxStatsList *min_max_stats_lst, CSearchResults &results){
+//         prior_score = pb_c * child->prior;
+        if (child->visit_count == 0){
+            value_score = parent_mean_q;
+            w_score = parent_mean_w;
+        } else {
+            float true_reward = child->value_prefix - parent_value_prefix;
+            if(is_reset == 1){
+                true_reward = child->value_prefix;
+            }
+            value_score = true_reward + discount * child->value();
+            w_score = child->w_value;
+        }
+        
+        sigma2 = w_score - pow(value_score, 2);
+
+        value_score = min_max_stats.normalize(value_score);
+
+        if (value_score < 0) value_score = 0;
+        if (value_score > 1) value_score = 1;
+
+        float ucb_value = value_score + child->prior * (sigma2 * pb_1 + pb_2);
+        return ucb_value;
+    }
+    
+    float cucb_score_bern(CNode *child, tools::CMinMaxStats &min_max_stats, float parent_mean_q, float parent_mean_w, int is_reset, float total_children_visit_counts, float parent_value_prefix, float pb_c_1, float pb_c_2, float pb_c_3, float discount, float max_q){
+        float pb_1 = 0.0, pb_2 = 0.0, value_score = 0.0, sigma2 = 0.0, w_score = 0.0, L = 0.0;
+//         pb_c = log((total_children_visit_counts + pb_c_base + 1) / pb_c_base) + pb_c_init;
+//         pb_c *= (sqrt(total_children_visit_counts) / (child->visit_count + 1));
+        L = log(total_children_visit_counts + pb_c_3 + 1);
+        pb_1 = pb_c_1 * sqrt(L) / sqrt(1 + child->visit_count);
+        pb_2 = pb_c_2 * L / (1 + child->visit_count);
+
+//         prior_score = pb_c * child->prior;
+        if (child->visit_count == 0){
+            value_score = parent_mean_q;
+            w_score = parent_mean_w;
+        } else {
+            float true_reward = child->value_prefix - parent_value_prefix;
+            if(is_reset == 1){
+                true_reward = child->value_prefix;
+            }
+            value_score = true_reward + discount * child->value();
+            w_score = child->w_value;
+        }
+        
+        sigma2 = w_score - pow(value_score, 2);
+
+        value_score = min_max_stats.normalize(value_score);
+
+        if (value_score < 0) value_score = 0;
+        if (value_score > 1) value_score = 1;
+
+        float ucb_value = value_score + igma2 * pb_1 + max_q * pb_2;
+        return ucb_value;
+    }
+
+    void cbatch_traverse(CRoots *roots, float pb_c_1, float pb_c_2, float pb_c_3, float discount, tools::CMinMaxStatsList *min_max_stats_lst, CSearchResults &results, int mode){
         // set seed
         timeval t1;
         gettimeofday(&t1, NULL);
@@ -429,6 +499,8 @@ namespace tree{
             int is_root = 1;
             int search_len = 0;
             results.search_paths[i].push_back(node);
+            
+            float max_q = FLOAT_MIN;
 
             while(node->expanded()){
                 float mean_q = node->get_mean_q(is_root, parent_q, discount);
@@ -436,8 +508,12 @@ namespace tree{
                 node->w_value = w_value;
                 is_root = 0;
                 parent_q = mean_q;
+                
+                if (mean_q > max_q){
+                    max_q = mean_q;   
+                }
 
-                int action = cselect_child(node, min_max_stats_lst->stats_lst[i], pb_c_1, pb_c_2, pb_c_3, discount, mean_q, w_value);
+                int action = cselect_child(node, min_max_stats_lst->stats_lst[i], pb_c_1, pb_c_2, pb_c_3, discount, mean_q, w_value, max_q, mode);
                 node->best_action = action;
                 // next
                 node = node->get_child(action);

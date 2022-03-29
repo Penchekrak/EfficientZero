@@ -1,7 +1,6 @@
 # distutils: language=c++
 from libcpp.vector cimport vector
 
-
 cdef extern from "cminimax.cpp":
     pass
 
@@ -71,4 +70,4 @@ cdef extern from "cnode.h" namespace "tree":
     cdef void cback_propagate(vector[CNode*] &search_path, CMinMaxStats &min_max_stats, int to_play, float value, float discount)
     void cbatch_back_propagate(int hidden_state_index_x, float discount, vector[float] value_prefixs, vector[float] values, vector[vector[float]] policies,
                                CMinMaxStatsList *min_max_stats_lst, CSearchResults &results, vector[int] is_reset_lst)
-    void cbatch_traverse(CRoots *roots, float pb_c_1, float pb_c_2, float pb_c_3, float discount, CMinMaxStatsList *min_max_stats_lst, CSearchResults &results)
+    void cbatch_traverse(CRoots *roots, float pb_c_1, float pb_c_2, float pb_c_3, float discount, CMinMaxStatsList *min_max_stats_lst, CSearchResults &results, int mode)

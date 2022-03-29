@@ -28,6 +28,7 @@ class MCTS(object):
             num = roots.num
             device = self.config.device
             pb_c_1, pb_c_2, pb_c_3, discount = self.config.pb_c_1, self.config.pb_c_2, self.config.pb_c_3, self.config.discount
+            mode = self.config.mode
             # the data storage of hidden states: storing the states of all the tree nodes
             hidden_state_pool = [hidden_state_roots]
             # 1 x batch x 64
@@ -52,7 +53,7 @@ class MCTS(object):
                 # hidden_state_index_x_lst: the first index of leaf node states in hidden_state_pool
                 # hidden_state_index_y_lst: the second index of leaf node states in hidden_state_pool
                 # the hidden state of the leaf node is hidden_state_pool[x, y]; value prefix states are the same
-                hidden_state_index_x_lst, hidden_state_index_y_lst, last_actions = tree.batch_traverse(roots, pb_c_1, pb_c_2, pb_c_3, discount, min_max_stats_lst, results)
+                hidden_state_index_x_lst, hidden_state_index_y_lst, last_actions = tree.batch_traverse(roots, pb_c_1, pb_c_2, pb_c_3, discount, min_max_stats_lst, results, mode)
                 # obtain the search horizon for leaf nodes
                 search_lens = results.get_search_len()
 

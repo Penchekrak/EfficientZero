@@ -96,8 +96,8 @@ def batch_back_propagate(int hidden_state_index_x, float discount, list value_pr
                           min_max_stats_lst.cmin_max_stats_lst, results.cresults, is_reset_lst)
 
 
-def batch_traverse(Roots roots, float pb_c_1, float pb_c_2, float pb_c_3, float discount, MinMaxStatsList min_max_stats_lst, ResultsWrapper results):
+def batch_traverse(Roots roots, float pb_c_1, float pb_c_2, float pb_c_3, float discount, MinMaxStatsList min_max_stats_lst, ResultsWrapper results, int mode):
 
-    cbatch_traverse(roots.roots, pb_c_1, pb_c_2, pb_c_3, discount, min_max_stats_lst.cmin_max_stats_lst, results.cresults)
+    cbatch_traverse(roots.roots, pb_c_1, pb_c_2, pb_c_3, discount, min_max_stats_lst.cmin_max_stats_lst, results.cresults, mode)
 
     return results.cresults.hidden_state_index_x_lst, results.cresults.hidden_state_index_y_lst, results.cresults.last_actions
