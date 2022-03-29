@@ -481,7 +481,7 @@ namespace tree{
         if (value_score < 0) value_score = 0;
         if (value_score > 1) value_score = 1;
 
-        float ucb_value = value_score + igma2 * pb_1 + max_q * pb_2;
+        float ucb_value = value_score + sigma2 * pb_1 + max_q * pb_2;
         return ucb_value;
     }
 
