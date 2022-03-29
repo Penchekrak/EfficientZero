@@ -225,8 +225,8 @@ class BaseConfig(object):
         self.root_exploration_fraction = 0.25
 
         # UCB formula
-        self.pb_c_1 = 19652
-        self.pb_c_2 = 19652
+        self.pb_c_1 = 1.55
+        self.pb_c_2 = 3.6
         self.pb_c_3 = 1.25
         self.mode = 2 ## variants: 0 - 'base', 1 - 'prior', 2 - 'bern'
 
