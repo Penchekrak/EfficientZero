@@ -393,7 +393,7 @@ namespace tree{
         float pb_1 = 0.0, pb_2 = 0.0, value_score = 0.0, sigma2 = 0.0, w_score = 0.0, L = 0.0;
 //         pb_c = log((total_children_visit_counts + pb_c_base + 1) / pb_c_base) + pb_c_init;
 //         pb_c *= (sqrt(total_children_visit_counts) / (child->visit_count + 1));
-        L = log(total_children_visit_counts + pb_c_3 + 1);
+        L = log((total_children_visit_counts + pb_c_3 + 1) / pb_c_3);
         pb_1 = pb_c_1 * sqrt(L) / sqrt(1 + child->visit_count);
         pb_2 = pb_c_2 * L / (1 + child->visit_count);
 
@@ -425,7 +425,7 @@ namespace tree{
         float pb_1 = 0.0, pb_2 = 0.0, value_score = 0.0, sigma2 = 0.0, w_score = 0.0, L = 0.0;
 //         pb_c = log((total_children_visit_counts + pb_c_base + 1) / pb_c_base) + pb_c_init;
 //         pb_c *= (sqrt(total_children_visit_counts) / (child->visit_count + 1));
-        L = log(total_children_visit_counts + pb_c_3 + 1);
+        L = log((total_children_visit_counts + pb_c_3 + 1) / pb_c_3);
         pb_1 = pb_c_1 * sqrt(L) / sqrt(1 + child->visit_count);
         pb_2 = pb_c_2 * L / (1 + child->visit_count);
 
@@ -457,7 +457,7 @@ namespace tree{
         float pb_1 = 0.0, pb_2 = 0.0, value_score = 0.0, sigma2 = 0.0, w_score = 0.0, L = 0.0;
 //         pb_c = log((total_children_visit_counts + pb_c_base + 1) / pb_c_base) + pb_c_init;
 //         pb_c *= (sqrt(total_children_visit_counts) / (child->visit_count + 1));
-        L = log(total_children_visit_counts + pb_c_3 + 1);
+        L = log((total_children_visit_counts + pb_c_3 + 1) / pb_c_3);
         pb_1 = pb_c_1 * sqrt(L) / sqrt(1 + child->visit_count);
         pb_2 = pb_c_2 * L / (1 + child->visit_count);
 
