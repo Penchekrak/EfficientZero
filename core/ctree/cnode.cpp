@@ -34,7 +34,7 @@ namespace tree{
         this->w_value = 0.0;
     }
 
-    CNode::CNode(float prior, int action_num, std::vector<CNode>* ptr_node_pool, ){
+    CNode::CNode(float prior, int action_num, std::vector<CNode>* ptr_node_pool){
         this->prior = prior;
         this->action_num = action_num;
 
@@ -364,7 +364,7 @@ namespace tree{
             CNode* child = root->get_child(a);
             float temp_score = 0.;
             if (mode==0){
-                temp_score = cucb_score(child, min_max_stats, mean_q, mean_w, root->is_reset, root->visit_count - 1, root->value_prefix, pb_c_1, pb_c_2, pb_c_3, discount);
+                temp_score = cucb_score_base(child, min_max_stats, mean_q, mean_w, root->is_reset, root->visit_count - 1, root->value_prefix, pb_c_1, pb_c_2, pb_c_3, discount);
             } else if (mode==1){
                 temp_score = cucb_score_prior(child, min_max_stats, mean_q, mean_w, root->is_reset, root->visit_count - 1, root->value_prefix, pb_c_1, pb_c_2, pb_c_3, discount);
             } else if (mode==2){
