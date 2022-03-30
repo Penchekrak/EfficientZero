@@ -411,13 +411,15 @@ namespace tree{
         }
         
         sigma2 = w_score - pow(value_score, 2);
+        
+        float sigma = min_max_stats.normalize(sqrt(sigma2));
 
         value_score = min_max_stats.normalize(value_score);
 
         if (value_score < 0) value_score = 0;
         if (value_score > 1) value_score = 1;
 
-        float ucb_value = value_score + sigma2 * pb_1 + pb_2;
+        float ucb_value = value_score + sigma * pb_1 + pb_2;
         return ucb_value;
     }
     
@@ -443,13 +445,15 @@ namespace tree{
         }
         
         sigma2 = w_score - pow(value_score, 2);
+        
+        float sigma = min_max_stats.normalize(sqrt(sigma2));
 
         value_score = min_max_stats.normalize(value_score);
 
         if (value_score < 0) value_score = 0;
         if (value_score > 1) value_score = 1;
 
-        float ucb_value = value_score + child->prior * (sigma2 * pb_1 + pb_2);
+        float ucb_value = value_score + child->prior * (sigma * pb_1 + pb_2);
         return ucb_value;
     }
     
@@ -475,13 +479,15 @@ namespace tree{
         }
         
         sigma2 = w_score - pow(value_score, 2);
+        
+        float sigma = min_max_stats.normalize(sqrt(sigma2));
 
         value_score = min_max_stats.normalize(value_score);
 
         if (value_score < 0) value_score = 0;
         if (value_score > 1) value_score = 1;
 
-        float ucb_value = value_score + sigma2 * pb_1 + max_q * pb_2;
+        float ucb_value = value_score + sigma * pb_1 + max_q * pb_2;
         return ucb_value;
     }
 
