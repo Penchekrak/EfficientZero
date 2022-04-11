@@ -98,11 +98,11 @@ if __name__ == '__main__':
             else:
                 model_path = None
 
-            ##### TESTING #####
-            game_config.training_steps = 1
-            game_config.last_steps = 1
-            game_config.test_episodes = 1
-            ##### TESTING #####
+            # ##### TESTING #####
+            # game_config.training_steps = 1
+            # game_config.last_steps = 1
+            # game_config.test_episodes = 1
+            # ##### TESTING #####
 
             model, weights = train(game_config, summary_writer, model_path)
             model.set_weights(weights)

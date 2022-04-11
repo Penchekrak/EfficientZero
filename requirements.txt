@@ -7,3 +7,4 @@ tensorboard
 opencv-python
 kornia
 wandb
+tqdm
