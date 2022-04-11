@@ -66,6 +66,7 @@ namespace tree {
             std::vector<int> hidden_state_index_x_lst, hidden_state_index_y_lst, last_actions, search_lens;
             std::vector<CNode*> nodes;
             std::vector<std::vector<CNode*>> search_paths;
+            std::vector<float> stds;
 
             CSearchResults();
             CSearchResults(int num);
