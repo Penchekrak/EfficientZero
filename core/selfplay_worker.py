@@ -147,11 +147,12 @@ class DataWorker(object):
                 pred_values_lst = [[] for _ in range(env_nums)]
 
                 # some logs
-                eps_ori_reward_lst, eps_reward_lst, eps_steps_lst, visit_entropies_lst = np.zeros(env_nums), np.zeros(env_nums), np.zeros(env_nums), np.zeros(env_nums)
+                eps_ori_reward_lst, eps_reward_lst, eps_var_lst, eps_steps_lst, visit_entropies_lst = np.zeros(env_nums), np.zeros(env_nums), np.zeros(env_nums), np.zeros(env_nums), np.zeros(env_nums)
                 step_counter = 0
 
                 self_play_rewards = 0.
                 self_play_ori_rewards = 0.
+                self_play_variance = 0.
                 self_play_moves = 0.
                 self_play_episodes = 0.
 
@@ -204,16 +205,18 @@ class DataWorker(object):
                                 log_self_play_moves = self_play_moves / self_play_episodes
                                 log_self_play_rewards = self_play_rewards / self_play_episodes
                                 log_self_play_ori_rewards = self_play_ori_rewards / self_play_episodes
+                                log_self_play_variance = self_play_variance / self_play_episodes
                             else:
                                 log_self_play_moves = 0
                                 log_self_play_rewards = 0
                                 log_self_play_ori_rewards = 0
+                                log_self_play_variance = 0
 
                             self.storage.set_data_worker_logs.remote(log_self_play_moves, self_play_moves_max,
                                                                             log_self_play_ori_rewards, log_self_play_rewards,
                                                                             self_play_rewards_max, _temperature.mean(),
                                                                             visit_entropies, 0,
-                                                                            other_dist)
+                                                                            other_dist, log_self_play_variance)
                             self_play_rewards_max = - np.inf
 
                     step_counter += 1
@@ -250,6 +253,7 @@ class DataWorker(object):
                             self_play_visit_entropy.append(visit_entropies_lst[i] / eps_steps_lst[i])
                             self_play_moves += eps_steps_lst[i]
                             self_play_episodes += 1
+                            self_play_variance += eps_var_lst[i]
 
                             pred_values_lst[i] = []
                             search_values_lst[i] = []
@@ -258,6 +262,7 @@ class DataWorker(object):
                             eps_reward_lst[i] = 0
                             eps_ori_reward_lst[i] = 0
                             visit_entropies_lst[i] = 0
+                            eps_var_lst[i] = 0
 
                     # stack obs for model inference
                     stack_obs = [game_history.step_obs() for game_history in game_histories]
@@ -286,13 +291,14 @@ class DataWorker(object):
 
                     roots_distributions = roots.get_distributions()
                     roots_values = roots.get_values()
+                    roots_vars = roots.get_variances()
                     for i in range(env_nums):
                         deterministic = False
                         if start_training:
-                            distributions, value, temperature, env = roots_distributions[i], roots_values[i], _temperature[i], envs[i]
+                            distributions, value, temperature, env, var = roots_distributions[i], roots_values[i], _temperature[i], envs[i], roots_vars[i]
                         else:
                             # before starting training, use random policy
-                            value, temperature, env = roots_values[i], _temperature[i], envs[i]
+                            value, temperature, env, var = roots_values[i], _temperature[i], envs[i], roots_vars[i]
                             distributions = np.ones(self.config.action_space_size)
 
                         action, visit_entropy = select_action(distributions, temperature=temperature, deterministic=deterministic)
@@ -311,6 +317,7 @@ class DataWorker(object):
                         eps_ori_reward_lst[i] += ori_reward
                         dones[i] = done
                         visit_entropies_lst[i] += visit_entropy
+                        eps_var_lst[i] += var
 
                         eps_steps_lst[i] += 1
                         total_transitions += 1
@@ -365,6 +372,7 @@ class DataWorker(object):
                         self_play_visit_entropy.append(visit_entropies_lst[i] / eps_steps_lst[i])
                         self_play_moves += eps_steps_lst[i]
                         self_play_episodes += 1
+                        self_play_variance += eps_var_lst[i]
                     else:
                         # if the final game history is not finished, we will not save this data.
                         total_transitions -= len(game_histories[i])
@@ -377,10 +385,12 @@ class DataWorker(object):
                     log_self_play_moves = self_play_moves / self_play_episodes
                     log_self_play_rewards = self_play_rewards / self_play_episodes
                     log_self_play_ori_rewards = self_play_ori_rewards / self_play_episodes
+                    log_self_play_variance = self_play_variance / self_play_episodes
                 else:
                     log_self_play_moves = 0
                     log_self_play_rewards = 0
                     log_self_play_ori_rewards = 0
+                    log_self_play_variance = 0
 
                 other_dist = {}
                 # send logs
@@ -388,4 +398,4 @@ class DataWorker(object):
                                                                 log_self_play_ori_rewards, log_self_play_rewards,
                                                                 self_play_rewards_max, _temperature.mean(),
                                                                 visit_entropies, 0,
-                                                                other_dist)
+                                                                other_dist, log_self_play_variance)
