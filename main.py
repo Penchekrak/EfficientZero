@@ -116,6 +116,9 @@ if __name__ == '__main__':
             logging.getLogger('train_test').info(test_msg)
             if args.save_video:
                 logging.getLogger('train_test').info('Saving video in path: {}'.format(test_path))
+                video_paths = [s for s in Path(self.path).iterdir() if s.suffix == '.mp4']
+                for path in video_paths:
+                    wandb.log({'replay': wandb.Video(str(path))})
             wandb.finish()
         elif args.opr == 'test':
             assert args.load_model
