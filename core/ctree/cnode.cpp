@@ -32,6 +32,7 @@ namespace tree{
         this->ptr_node_pool = nullptr;
         
         this->w_value = 0.0;
+        this->sigma2 = 0.0;
     }
 
     CNode::CNode(float prior, int action_num, std::vector<CNode>* ptr_node_pool){
@@ -411,6 +412,7 @@ namespace tree{
         }
         
         sigma2 = w_score - pow(value_score, 2);
+        child->sigma2 = sigma2;
         
         float sigma = min_max_stats.normalize(sqrt(sigma2));
 
@@ -445,6 +447,7 @@ namespace tree{
         }
         
         sigma2 = w_score - pow(value_score, 2);
+        child->sigma2 = sigma2;
         
         float sigma = min_max_stats.normalize(sqrt(sigma2));
 
@@ -479,6 +482,7 @@ namespace tree{
         }
         
         sigma2 = w_score - pow(value_score, 2);
+        child->sigma2 = sigma2;
         
         float sigma = min_max_stats.normalize(sqrt(sigma2));
 
@@ -536,6 +540,8 @@ namespace tree{
             results.last_actions.push_back(last_action);
             results.search_lens.push_back(search_len);
             results.nodes.push_back(node);
+            
+            results.stds.push_back(parent->sigma2);
         }
     }
 
