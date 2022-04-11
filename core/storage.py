@@ -56,6 +56,7 @@ class SharedStorage(object):
         self.priority_self_play_log = []
         self.distributions_log = {}
         self.start = False
+        self.var_log = []
 
     def set_start_signal(self):
         self.start = True
@@ -114,6 +115,7 @@ class SharedStorage(object):
             visit_entropy = sum(self.visit_entropies_log) / len(self.visit_entropies_log)
             priority_self_play = sum(self.priority_self_play_log) / len(self.priority_self_play_log)
             distributions = self.distributions_log
+            variance = sum(self.var_log) / len(self.var_log)
 
             self.ori_reward_log = []
             self.reward_log = []
@@ -124,6 +126,7 @@ class SharedStorage(object):
             self.visit_entropies_log = []
             self.priority_self_play_log = []
             self.distributions_log = {}
+            self.var_log = []
 
         else:
             ori_reward = None
@@ -135,6 +138,7 @@ class SharedStorage(object):
             visit_entropy = None
             priority_self_play = None
             distributions = None
+            variance = None
 
         if len(self.test_dict_log) > 0:
             test_dict = self.test_dict_log
@@ -145,4 +149,4 @@ class SharedStorage(object):
             test_dict = None
             test_counter = None
 
-        return ori_reward, reward, reward_max, eps_lengths, eps_lengths_max, test_counter, test_dict, temperature, visit_entropy, priority_self_play, distributions
+        return ori_reward, reward, reward_max, eps_lengths, eps_lengths_max, test_counter, test_dict, temperature, visit_entropy, priority_self_play, distributions, variance
