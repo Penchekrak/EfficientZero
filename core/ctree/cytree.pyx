@@ -100,4 +100,4 @@ def batch_traverse(Roots roots, float pb_c_1, float pb_c_2, float pb_c_3, float 
 
     cbatch_traverse(roots.roots, pb_c_1, pb_c_2, pb_c_3, discount, min_max_stats_lst.cmin_max_stats_lst, results.cresults, mode)
 
-    return results.cresults.hidden_state_index_x_lst, results.cresults.hidden_state_index_y_lst, results.cresults.last_actions
+    return results.cresults.hidden_state_index_x_lst, results.cresults.hidden_state_index_y_lst, results.cresults.last_actions, results.cresults.stds

@@ -18,7 +18,7 @@ namespace tree {
     class CNode {
         public:
             int visit_count, to_play, action_num, hidden_state_index_x, hidden_state_index_y, best_action, is_reset;
-            float value_prefix, prior, value_sum, w_value;
+            float value_prefix, prior, value_sum, w_value, sigma2;
             std::vector<int> children_index;
             std::vector<CNode>* ptr_node_pool;
 
@@ -66,6 +66,7 @@ namespace tree {
             std::vector<int> hidden_state_index_x_lst, hidden_state_index_y_lst, last_actions, search_lens;
             std::vector<CNode*> nodes;
             std::vector<std::vector<CNode*>> search_paths;
+            std::vector<float> stds;
 
             CSearchResults();
             CSearchResults(int num);
