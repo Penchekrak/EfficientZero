@@ -1,6 +1,7 @@
 import argparse
 import logging.config
 import os
+from pathlib import Path
 
 import numpy as np
 import ray
@@ -96,6 +97,13 @@ if __name__ == '__main__':
                 model_path = args.model_path
             else:
                 model_path = None
+
+            ##### TESTING #####
+            game_config.training_steps = 1
+            game_config.last_steps = 1
+            game_config.test_episodes = 1
+            ##### TESTING #####
+
             model, weights = train(game_config, summary_writer, model_path)
             model.set_weights(weights)
             total_steps = game_config.training_steps + game_config.last_steps
@@ -116,7 +124,7 @@ if __name__ == '__main__':
             logging.getLogger('train_test').info(test_msg)
             if args.save_video:
                 logging.getLogger('train_test').info('Saving video in path: {}'.format(test_path))
-                video_paths = [s for s in Path(self.path).iterdir() if s.suffix == '.mp4']
+                video_paths = [s for s in Path(test_path).iterdir() if s.suffix == '.mp4']
                 for path in video_paths:
                     wandb.log({'replay': wandb.Video(str(path))})
             wandb.finish()
