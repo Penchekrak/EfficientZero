@@ -82,7 +82,7 @@ class SharedStorage(object):
     def get_counter(self):
         return self.step_counter
 
-    def set_data_worker_logs(self, eps_len, eps_len_max, eps_ori_reward, eps_reward, eps_reward_max, temperature, visit_entropy, priority_self_play, distributions):
+    def set_data_worker_logs(self, eps_len, eps_len_max, eps_ori_reward, eps_reward, eps_reward_max, temperature, visit_entropy, priority_self_play, distributions, variance):
         self.eps_lengths.append(eps_len)
         self.eps_lengths_max.append(eps_len_max)
         self.ori_reward_log.append(eps_ori_reward)
@@ -91,6 +91,7 @@ class SharedStorage(object):
         self.temperature_log.append(temperature)
         self.visit_entropies_log.append(visit_entropy)
         self.priority_self_play_log.append(priority_self_play)
+        self.var_log.append(variance)
 
         for key, val in distributions.items():
             if key not in self.distributions_log.keys():
