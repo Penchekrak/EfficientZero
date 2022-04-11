@@ -21,7 +21,7 @@ def _log(config, step_count, log_data, model, replay_buffer, lr, shared_storage,
         replay_buffer.get_priorities.remote(), replay_buffer.get_total_len.remote(),
         shared_storage.get_worker_logs.remote()])
 
-    worker_ori_reward, worker_reward, worker_reward_max, worker_eps_len, worker_eps_len_max, test_counter, test_dict, temperature, visit_entropy, priority_self_play, distributions = worker_logs
+    worker_ori_reward, worker_reward, worker_reward_max, worker_eps_len, worker_eps_len_max, test_counter, test_dict, temperature, visit_entropy, priority_self_play, distributions, worker_variance = worker_logs
 
     _msg = '#{:<10} Total Loss: {:<8.3f} [weighted Loss:{:<8.3f} Policy Loss: {:<8.3f} Value Loss: {:<8.3f} ' \
            'Reward Sum Loss: {:<8.3f} Consistency Loss: {:<8.3f} ] ' \
@@ -122,6 +122,7 @@ def _log(config, step_count, log_data, model, replay_buffer, lr, shared_storage,
             summary_writer.add_scalar('workers/temperature', temperature, step_count)
             summary_writer.add_scalar('workers/visit_entropy', visit_entropy, step_count)
             summary_writer.add_scalar('workers/priority_self_play', priority_self_play, step_count)
+            summary_writer.add_scalar('workers/variance', worker_variance, step_count)
             for key, val in distributions.items():
                 if len(val) == 0:
                     continue
