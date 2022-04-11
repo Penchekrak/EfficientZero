@@ -283,6 +283,14 @@ namespace tree{
         }
         return values;
     }
+    
+    std::vector<float> CRoots::get_variances(){
+        std::vector<float> vars;
+        for(int i = 0; i < this->root_num; ++i){
+            vars.push_back(this->roots[i].sigma2);
+        }
+        return vars;
+    }
 
     //*********************************************************
 
